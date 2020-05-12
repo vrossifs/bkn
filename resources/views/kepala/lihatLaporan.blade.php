@@ -27,7 +27,8 @@
 					<h4 class="panel-title">Lihat Data Tahunan	</h4>
 				</div>
 				<div class="panel-body">
-					<form action="#" method="POST" class="form-horizontal" >
+					<form action="{{url('laporan/printLaporanTahun')}}" method="POST" class="form-horizontal" >
+						@csrf
 						<div class="form-group">
 							<label class="col-md-2 control-label">Pilih Tanggal awal</label>
 							<div class="col-md-10">

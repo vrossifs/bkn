@@ -35,9 +35,6 @@ Route::resource('kepala/index', 'KepalaTUController');
 Route::get('kepala/lihatBarang', 'KepalaTUController@lihatBarang');
 Route::get('kepala/beliBarang', 'KepalaTUController@beliBarang');
 Route::get('kepala/ambilBarang', 'KepalaTUController@ambilBarang');
-
-Route::get('kepala/aksiBeliBarang', 'KepalaTUController@aksiBeliBarang');
-Route::get('kepala/aksiAmbilBarang', 'KepalaTUController@aksiAmbilBarang');
 Route::get('kepala/lihatLaporan', 'KepalaTUController@lihatLaporan');
 Route::get('kepala/priviewKtu/{kodeUnit}', 'KepalaTUController@priviewKtu');
 
@@ -45,6 +42,10 @@ Route::get('kepala/priviewKtu/{kodeUnit}', 'KepalaTUController@priviewKtu');
 Route::get('kepala/dialogBeliBarang/{kdbarang}', 'KepalaTUController@dialogBeliBarang');
 Route::get('kepala/dialogAmbilBarang/{kdbarang}', 'KepalaTUController@dialogAmbilBarang');
 Route::get('kepala/dialogDetailBarang/{kdbarang}', 'KepalaTUController@dialogDetailBarang');
+
+// Action
+Route::post('kepala/aksiBeliBarang', 'KepalaTUController@aksiBeliBarang');
+Route::post('kepala/aksiAmbilBarang', 'KepalaTUController@aksiAmbilBarang');
 
 // -----
 
@@ -62,13 +63,17 @@ Route::get('keuangan/lihatLaporanBulanan', 'KeuanganTUController@lihatLaporanBul
 Route::get('keuangan/priviewKtu/{kodeUnit}', 'KeuanganTUController@priviewKtu');
 Route::get('keuangan/riwayatTambahBarang', 'KeuanganTUController@riwayatTambahBarang');
 
-Route::get('keuangan/aksiBeliBarang', 'KeuanganTUController@aksiBeliBarang');
-Route::get('keuangan/aksiAmbilBarang', 'KeuanganTUController@aksiAmbilBarang');
-
 // Dialog KeuanganTU
 Route::get('keuangan/dialogBeliBarang/{kdbarang}', 'KeuanganTUController@dialogBeliBarang');
 Route::get('keuangan/dialogAmbilBarang/{kdbarang}', 'KeuanganTUController@dialogAmbilBarang');
 Route::get('keuangan/dialogDetailBarang/{kdbarang}', 'KeuanganTUController@dialogDetailBarang');
+
+// Action
+Route::post('keuangan/aksiBeliBarang', 'KeuanganTUController@aksiBeliBarang');
+Route::post('keuangan/aksiAmbilBarang', 'KeuanganTUController@aksiAmbilBarang');
+Route::post('keuangan/approve', 'KeuanganTUController@approve');
+Route::get('keuangan/approveSingle/{kdtransaksi}', 'KeuanganTUController@approveSingle');
+Route::get('keuangan/declineSingle/{kdtransaksi}', 'KeuanganTUController@declineSingle');
 
 // -----
 
@@ -92,6 +97,12 @@ Route::get('pegsub/dialogDetailBarang/{kdbarang}', 'PegSubController@dialogDetai
 Route::get('pegsub/dialogLaporanTahun/', 'PegSubController@dialogLaporanTahun');
 Route::get('pegsub/dialogLaporanBulan/', 'PegSubController@dialogLaporanBulan');
 
+// Action
+Route::post('pegsub/aksiBeliBarang', 'PegSubController@aksiBeliBarang');
+Route::post('pegsub/approve', 'PegSubController@approve');
+Route::get('pegsub/approveSingle/{kdtransaksi}', 'PegSubController@approveSingle');
+Route::get('pegsub/declineSingle/{kdtransaksi}', 'PegSubController@declineSingle');
+
 // -----
 
 //PegBkn
@@ -108,5 +119,9 @@ Route::get('pegbkn/aksiAmbilBarang', 'PegBknController@aksiAmbilBarang');
 Route::get('pegbkn/dialogBeliBarang/{kdbarang}', 'PegBknController@dialogBeliBarang');
 Route::get('pegbkn/dialogAmbilBarang/{kdbarang}', 'PegBknController@dialogAmbilBarang');
 Route::get('pegbkn/dialogDetailBarang/{kdbarang}', 'PegBknController@dialogDetailBarang');
+
+// Laporan
+Route::post('laporan/printLaporanTahun', 'LaporanController@printLaporanTahun');
+Route::post('laporan/printLaporanBulan', 'LaporanController@printLaporanBulan');
 
 // -----

@@ -21,8 +21,7 @@
 			'alert_type'    => '',
 			'alert_header'  => '',
 			'alert_message' => ''
-		]);
-		?>
+		]); ?>
 	</div>
 	@endif
 	<!-- begin row -->

@@ -2,7 +2,8 @@
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h4 class="modal-title">Input Data Pengambilan Barang</h4>
 </div>
-<form action="{{action('KepalaTUController@aksiAmbilBarang')}}" method="GET" class="form-horizontal" >
+<form action="{{action('KepalaTUController@aksiAmbilBarang')}}" method="POST" class="form-horizontal" >
+    @csrf
     <div class="modal-body">
         @foreach($barang as $row)
         <input type='hidden' name='kdbarang' value="{{$row->kdbarang}}" />

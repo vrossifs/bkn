@@ -4,138 +4,30 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use App\Akun;
+use App\Pegawai;
 use App\Transaksi;
 use App\Barang;
 use App\UnitKerja;
 use DB;
 
-class KepalaTUController extends Controller
+class LaporanController extends Controller 
 {
-    //
-    public function index()
+
+	public function printLaporanTahun(Request $request)
     {
-    	//
-    	return view('kepala.dashboard');
-    }
+        $awal = date("Y-m-d", strtotime($request->awal));
+        $akhir = date("Y-m-d", strtotime($request->akhir));
 
-    public function lihatBarang()
-    {
-    	//
-    	$barang = Barang::all();
-        return view('kepala.lihatBarang', compact('barang'));
-    }
-
-    public function beliBarang()
-    {
-    	// 
-    	$barang = Barang::all();
-        return view('kepala.beliBarang', compact('barang'));
-    }
-
-    public function dialogBeliBarang($kdbarang)
-    {
-    	$barang = Barang::where(['kdbarang' => $kdbarang])->get();
-        return view('kepala.dialogBeliBarang', compact('barang'));
-    }
-
-    public function aksiBeliBarang(Request $request)
-    {
-    	// 
-        Transaksi::create([
-            'kdbarang' => $request->kdbarang,
-            'kode_unit' => $request->session()->get('kode_unit'),
-            'tanggal' => date('Y-m-d'),
-            'status' => 6,
-            'jenistransaksi' => 'Beli',
-            'tambah' => $request->jumlah,
-            'kurang' => 0
-        ]);
-
-        $query = Transaksi::where('kode_unit', $request->session()->get('kode_unit'))
-            ->orderBy('kdtransaksi')->limit(1)->get();
-
-        foreach ($query as $key) {
-            $kdtransaksi = $key->kdtransaksi;
-        }
-
-        DB::table('notif_khusus')
-            ->insert([
-                'pengirim'  => $kdtransaksi,
-                'penerima'  => 2,
-                'header'    => "Pengajuan Pembelian",
-                'pesan'     => "Pengajuan pembelian barang<br> dari ".$request->session()->get('kode_unit'),
-                'tanggal'   => date("Y-m-d H:i:s"),
-                'status'    => 6
-            ]);
-
-        session([
-            'alert_type'    => 'alert-success',
-            'alert_header'  => 'Success!',
-            'alert_message' => 'Pengajuan Telah Dikirim!'
-        ]);
-
-        return redirect()->action('KepalaTUController@beliBarang');
-    }
-
-    public function ambilBarang()
-    {
-    	$barang = Barang::all();
-        return view('kepala.ambilBarang', compact('barang'));
-    }
-
-    public function dialogAmbilBarang($kdbarang)
-    {
-        $barang = Barang::where(['kdbarang' => $kdbarang])->get();
-        return view('kepala.dialogAmbilBarang', compact('barang'));
-    }
-
-    public function aksiAmbilBarang(Request $request)
-    {
-        // 
-        Transaksi::create([
-            'kdbarang' => $request->kdbarang,
-            'kode_unit' => $request->session()->get('kode_unit'),
-            'tanggal' => date('Y-m-d'),
-            'status' => 6,
-            'jenistransaksi' => 'Ambil',
-            'tambah' => 0,
-            'kurang' => $request->jumlah
-        ]);
-
-        $query = Transaksi::where('kode_unit', $request->session()->get('kode_unit'))
-            ->orderBy('kdtransaksi')->limit(1)->get();
-
-        foreach ($query as $key) {
-            $kdtransaksi = $key->kdtransaksi;
-        }
-
-        DB::table('notif_khusus')
-            ->insert([
-                'pengirim'  => $kdtransaksi,
-                'penerima'  => 3,
-                'header'    => "Pengajuan Pembelian",
-                'pesan'     => "Pengajuan pembelian barang<br> dari ".$request->session()->get('kode_unit'),
-                'tanggal'   => date("Y-m-d H:i:s"),
-                'status'    => 6
-            ]);
-
-        session([
-            'alert_type'    => 'alert-success',
-            'alert_header'  => 'Success!',
-            'alert_message' => 'Pengajuan Telah Dikirim!'
-        ]);
-
-        return redirect()->action('KepalaTUController@ambilBarang');
-    }
-
-    public function dialogDetailBarang($kdbarang)
-    {
-    	$barang = Barang::where(['kdbarang' => $kdbarang])->get();
-        return view('kepala.dialogDetailBarang', compact('barang'));
-    }
-
-    public function lihatLaporan()
-    {
+        $barang1 = Barang::select('*', 'barang.jumlah as br_jml', 'transaksi.tanggal as tr_tgl', 'barang.tanggal as br_tgl')
+            ->leftJoin('transaksi', 'barang.kdbarang', '=', 'transaksi.kdbarang')->get();
+        $barang = Barang::select('*', 'barang.jumlah as br_jml', 'transaksi.tanggal as tr_tgl', 'barang.tanggal as br_tgl', DB::raw('SUM(tambah) as jml_tambah'), DB::raw('SUM(kurang) as jml_kurang'))
+            ->leftJoin('transaksi', 'barang.kdbarang', '=', 'transaksi.kdbarang')
+            ->whereBetween('transaksi.tanggal', [$awal, $akhir])
+            ->where(function($query) {
+                $query->where('transaksi.status', 5)->orWhere('transaksi.status', 8);
+            })
+            ->groupBy('transaksi.kdbarang')->get();
         $unitkepala = UnitKerja::select('*', DB::raw('SUM(transaksi.kurang) as ok'))
             ->join('transaksi', 'unit_kerja.kode_unit', '=', 'transaksi.kode_unit')
             ->where('transaksi.kode_unit', 1)
@@ -204,17 +96,24 @@ class KepalaTUController extends Controller
             ->join('transaksi', 'unit_kerja.kode_unit', '=', 'transaksi.kode_unit')
             ->where('transaksi.kode_unit', 17)
             ->where('transaksi.status', 8)->get();
-        $barang = Barang::all();
-        return view('kepala.lihatLaporan', compact('unitkepala', 'unit', 'unitumum', 'unit1', 'unit5', 'unit6', 'unit7', 'unit8', 'unit9', 'unit10', 'unit11', 'unit12', 'unit13', 'unit14', 'unit15', 'unit16', 'unit17', 'barang'));
+
+        return view('laporan.laporanTahun', compact('unitkepala', 'unit', 'unitumum', 'unit1', 'unit5', 'unit6', 'unit7', 'unit8', 'unit9', 'unit10', 'unit11', 'unit12', 'unit13', 'unit14', 'unit15', 'unit16', 'unit17', 'barang', 'barang1', 'awal', 'akhir'));
     }
 
-    public function priviewKtu($kodeUnit)
+    public function printLaporanBulan(Request $request)
     {
-        $data = Transaksi::select('*', 'transaksi.tanggal as tgl_transaksi')
-            ->join('barang', 'transaksi.kdbarang', '=', 'barang.kdbarang')
-            ->join('unit_kerja', 'transaksi.kode_unit', '=', 'unit_kerja.kode_unit')
-            ->where('transaksi.kode_unit', $kodeUnit)
-            ->where('transaksi.status', 8)->get();
-        return view('kepala.priviewKtu', compact('data'));
+    	$bulan = $request->bulan;
+    	$barang = Barang::select('*', 'barang.jumlah as br_jml', 'transaksi.tanggal as tr_tgl', 'barang.tanggal as br_tgl', DB::raw('SUM(tambah) as jml_tambah'), DB::raw('SUM(kurang) as jml_kurang'))
+    		->leftJoin('transaksi', 'barang.kdbarang', '=', 'transaksi.kdbarang')
+    		->whereMonth('transaksi.tanggal', $bulan)
+    		->where(function($query) {
+                $query->where('transaksi.status', 5)->orWhere('transaksi.status', 8);
+            })
+            ->groupBy('transaksi.kdbarang')->get();
+
+        return view('laporan.laporanBulan', compact('bulan', 'barang'));
     }
 }
+
+/* End of file LaporanController.php */
+/* Location: .//C/xampp/htdocs/laravel/bkn/app/Http/Controllers/LaporanController.php */

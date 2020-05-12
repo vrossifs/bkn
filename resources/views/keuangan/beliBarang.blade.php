@@ -12,6 +12,19 @@
 	</ol>
 	<!-- end breadcrumb -->
 	<h1 class="page-header m-b-10">Beli Barang</h1><hr />
+	@if(Session::get('alert_type') != '')
+    <div class="alert {{Session::get('alert_type')}} fade in m-b-15">
+        <strong>{{Session::get('alert_header')}}</strong>
+        {{Session::get('alert_message')}}
+        <span class="close" data-dismiss="alert">&times;</span>
+        <?php 
+        session([
+            'alert_type'    => '',
+            'alert_header'  => '',
+            'alert_message' => ''
+        ]); ?>
+    </div>
+    @endif
 	<!-- begin row -->
 	<div class="row">
 		<!-- begin col-12 -->

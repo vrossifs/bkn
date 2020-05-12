@@ -27,7 +27,8 @@
                 <h4 class="panel-title">Data Barang</h4>
             </div>
             <div class="panel-body">
-                <form action="#" method="POST">
+                <form action="{{url('pegsub/approve')}}" method="POST">
+                    @csrf
                     <table id="data-table" class="table table-striped table-bordered">
                         <thead>
                             <tr>
@@ -49,7 +50,7 @@
                                     <td>{{$row->kurang." ".$row->satuan}}</td>
                                     <td>{{date("d M Y", strtotime($row->tgl_transaksi))}}</td>
                                     <td>{{$row->nama_unit}}</td>
-                                    <td><a href="#" class="btn-success btn-sm" title="Terima"><i class="fa fa-check"></i></a> | <a href="#" class="btn-danger btn-sm" title="Tolak"><i class="fa fa-times"></i></a></td>
+                                    <td><a href="{{url('pegsub/approveSingle', $row->kdtransaksi)}}" class="btn-success btn-sm" title="Terima"><i class="fa fa-check"></i></a> | <a href="{{url('pegsub/declineSingle', $row->kdtransaksi)}}" class="btn-danger btn-sm" title="Tolak"><i class="fa fa-times"></i></a></td>
                                 </tr>
                             @endforeach
                         </tbody>

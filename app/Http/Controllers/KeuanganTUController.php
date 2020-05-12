@@ -38,42 +38,43 @@ class KeuanganTUController extends Controller
         return view('keuangan.dialogBeliBarang', compact('barang'));
     }
 
-    public function aksiBeliBarang()
+    public function aksiBeliBarang(Request $request)
     {
-    	// 
-        $data = array(
-            'kdbarang' => $this->input->post('kdbarang'),
-            'kode_unit' => $this->session->userdata('kode_unit'),
+        // 
+        Transaksi::create([
+            'kdbarang' => $request->kdbarang,
+            'kode_unit' => $request->session()->get('kode_unit'),
             'tanggal' => date('Y-m-d'),
             'status' => 6,
             'jenistransaksi' => 'Beli',
-            'tambah' => $this->input->post('jumlah'),
+            'tambah' => $request->jumlah,
             'kurang' => 0
-        );
-        $this->M_keuanganTU->tambah('transaksi', $data);
+        ]);
 
-        $query = $this->db->query("SELECT kdtransaksi FROM transaksi WHERE kode_unit = ".$this->session->userdata('kode_unit')." ORDER BY kdtransaksi DESC LIMIT 1")->result();
+        $query = Transaksi::where('kode_unit', $request->session()->get('kode_unit'))
+            ->orderBy('kdtransaksi')->limit(1)->get();
 
         foreach ($query as $key) {
             $kdtransaksi = $key->kdtransaksi;
         }
 
-        $data_notif = array(
-            'pengirim'  => $kdtransaksi,
-            'penerima'  => 2,
-            'header'    => "Pengajuan Pembelian",
-            'pesan'     => "Pengajuan pembelian barang<br> dari ".$this->session->userdata('unit_kerja'),
-            'tanggal'   => date("Y-m-d H:i:s"),
-            'status'    => 6
-        );
-        $this->M_keuanganTU->tambah('notif_khusus', $data_notif);
+        DB::table('notif_khusus')
+            ->insert([
+                'pengirim'  => $kdtransaksi,
+                'penerima'  => 2,
+                'header'    => "Pengajuan Pembelian",
+                'pesan'     => "Pengajuan pembelian barang<br> dari ".$request->session()->get('kode_unit'),
+                'tanggal'   => date("Y-m-d H:i:s"),
+                'status'    => 6
+            ]);
 
-        $this->session->set_userdata('pesan_beli', '<div class="alert alert-success fade in m-b-15">
-            <strong>Success!</strong>
-             Pengajuan Telah Dikirim!
-            <span class="close" data-dismiss="alert">&times;</span>
-            </div>');
-        redirect($this->agent->referrer());
+        session([
+            'alert_type'    => 'alert-success',
+            'alert_header'  => 'Success!',
+            'alert_message' => 'Pengajuan Telah Dikirim!'
+        ]);
+
+        return redirect()->action('KeuanganTUController@beliBarang');
     }
 
     public function ambilBarang()
@@ -88,42 +89,43 @@ class KeuanganTUController extends Controller
         return view('keuangan.dialogAmbilBarang', compact('barang'));
     }
 
-    public function aksiAmbilBarang()
+    public function aksiAmbilBarang(Request $request)
     {
     	// 
-        $data = array (
-            'kdbarang' => $this->input->post('id'),
-            'kode_unit' => $this->session->userdata('kode_unit'),
+        Transaksi::create([
+            'kdbarang' => $request->kdbarang,
+            'kode_unit' => $request->session()->get('kode_unit'),
             'tanggal' => date('Y-m-d'),
             'status' => 6,
             'jenistransaksi' => 'Ambil',
             'tambah' => 0,
-            'kurang' => $this->input->post('jumlah')
-        );
-        $this->M_keuanganTU->inputbarangambil($data);
+            'kurang' => $request->jumlah
+        ]);
 
-        $query = $this->db->query("SELECT kdtransaksi FROM transaksi WHERE kode_unit = ".$this->session->userdata('kode_unit')." ORDER BY kdtransaksi DESC LIMIT 1")->result();
+        $query = Transaksi::where('kode_unit', $request->session()->get('kode_unit'))
+            ->orderBy('kdtransaksi')->limit(1)->get();
 
         foreach ($query as $key) {
             $kdtransaksi = $key->kdtransaksi;
         }
 
-        $data_notif = array(
-            'pengirim'  => $kdtransaksi,
-            'penerima'  => 3,
-            'header'    => "Pengajuan Pengambilan",
-            'pesan'     => "Pengajuan pengambilan barang<br> dari ".$this->session->userdata('unit_kerja'),
-            'tanggal'   => date("Y-m-d H:i:s"),
-            'status'    => 6
-        );
-        $this->M_keuanganTU->tambah('notif_khusus', $data_notif);
+        DB::table('notif_khusus')
+            ->insert([
+                'pengirim'  => $kdtransaksi,
+                'penerima'  => 3,
+                'header'    => "Pengajuan Pengambilan",
+                'pesan'     => "Pengajuan pengambilan barang<br> dari ".$request->session()->get('kode_unit'),
+                'tanggal'   => date("Y-m-d H:i:s"),
+                'status'    => 6
+            ]);
 
-        $this->session->set_userdata('pesan_ambil', '<div class="alert alert-success fade in m-b-15">
-            <strong>Success!</strong>
-             Pengajuan Telah Dikirim!
-            <span class="close" data-dismiss="alert">&times;</span>
-            </div>');
-        redirect($this->agent->referrer());
+        session([
+            'alert_type'    => 'alert-success',
+            'alert_header'  => 'Success!',
+            'alert_message' => 'Pengajuan Telah Dikirim!'
+        ]);
+
+        return redirect()->action('KeuanganTUController@ambilBarang');
     }
 
     public function dialogDetailBarang($kdbarang)
@@ -143,6 +145,165 @@ class KeuanganTUController extends Controller
             ])
             ->orderBy('kdtransaksi', 'asc')->get();
         return view('keuangan.approvalBeli', compact('barang'));
+    }
+
+    public function approve(Request $request)
+    {
+        if (isset($_POST['acc_all'])) {
+            $submittedData = $request->post();
+            foreach ($submittedData as $key => $value) {
+                if (strpos($key, "check|") !== false) {
+                    $kdtransaksi = explode("|", $key)[1];
+
+                    $query = Transaksi::select('*', 'transaksi.kdbarang as kd_barang', 'barang.jumlah as jml_barang')
+                        ->join('barang', 'transaksi.kdbarang', '=', 'barang.kdbarang')
+                        ->where('kdtransaksi', $kdtransaksi)->get();
+
+                    foreach ($query as $x) {
+                        $kdbarang = $x->kd_barang;
+                        $jml_barang = $x->jml_barang;
+                        $tambah = $x->tambah;
+                    }
+
+                    Transaksi::where('kdtransaksi', $kdtransaksi)
+                        ->update(['status' => 5]);  
+
+                    DB::table('notif_khusus')
+                        ->where('pengirim', $kdtransaksi)
+                        ->update(['status' => 8]);
+
+                    DB::table('history')
+                        ->insert([
+                            'kdtransaksi'  => $kdtransaksi,
+                            'status'  => 5,
+                            'tanggal'    => date("Y-m-d")]);
+
+                    DB::table('notifikasi')
+                        ->insert([
+                            'pengirim'  => $request->session()->get('kode_unit'),
+                            'penerima'  => $kdtransaksi,
+                            'header'    => "BELI BARANG DISETUJUI",
+                            'pesan'     => "Barang telah dibeli, sejumlah ".$tambah,
+                            'tanggal'   => date("Y-m-d H:i:s"),
+                            'status'    => 6]);
+                }
+            }
+            return redirect()->action('KeuanganTUController@approvalBeli');
+        }elseif (isset($_POST['dec_all'])) {
+            $submittedData = $request->post();
+            foreach ($submittedData as $key => $value) {
+                if (strpos($key, "check|") !== false) {
+                    $kdtransaksi = explode("|", $key)[1];
+
+                    $query = Transaksi::select('*', 'transaksi.kdbarang as kd_barang', 'barang.jumlah as jml_barang')
+                        ->join('barang', 'transaksi.kdbarang', '=', 'barang.kdbarang')
+                        ->where('kdtransaksi', $kdtransaksi)->get();
+
+                    foreach ($query as $x) {
+                        $kdbarang = $x->kd_barang;
+                        $jml_barang = $x->jml_barang;
+                        $tambah = $x->tambah;
+                    }
+
+                    Transaksi::where('kdtransaksi', $kdtransaksi)
+                        ->update(['status' => 7]);  
+
+                    DB::table('notif_khusus')
+                        ->where('pengirim', $kdtransaksi)
+                        ->update(['status' => 8]);
+
+                    DB::table('history')
+                        ->insert([
+                            'kdtransaksi'  => $kdtransaksi,
+                            'status'  => 7,
+                            'tanggal'    => date("Y-m-d")]);
+
+                    DB::table('notifikasi')
+                        ->insert([
+                            'pengirim'  => $request->session()->get('kode_unit'),
+                            'penerima'  => $kdtransaksi,
+                            'header'    => "BELI BARANG DISETUJUI",
+                            'pesan'     => "Barang telah dibeli, sejumlah ".$tambah,
+                            'tanggal'   => date("Y-m-d H:i:s"),
+                            'status'    => 6]);
+                }
+            }
+            return redirect()->action('KeuanganTUController@approvalBeli');
+        }
+    }
+
+    public function approveSingle($kdtransaksi, Request $request)
+    {
+        $query = Transaksi::select('*', 'transaksi.kdbarang as kd_barang', 'barang.jumlah as jml_barang')
+            ->join('barang', 'transaksi.kdbarang', '=', 'barang.kdbarang')
+            ->where('kdtransaksi', $kdtransaksi)->get();
+
+        foreach ($query as $x) {
+            $kdbarang = $x->kd_barang;
+            $jml_barang = $x->jml_barang;
+            $tambah = $x->tambah;
+        }
+
+        Transaksi::where('kdtransaksi', $kdtransaksi)
+            ->update(['status' => 5]);  
+
+        DB::table('notif_khusus')
+            ->where('pengirim', $kdtransaksi)
+            ->update(['status' => 8]);
+
+        DB::table('history')
+            ->insert([
+                'kdtransaksi'  => $kdtransaksi,
+                'status'  => 5,
+                'tanggal'    => date("Y-m-d")]);
+
+        DB::table('notifikasi')
+            ->insert([
+                'pengirim'  => $request->session()->get('kode_unit'),
+                'penerima'  => $kdtransaksi,
+                'header'    => "BELI BARANG DISETUJUI",
+                'pesan'     => "Barang telah dibeli, sejumlah ".$tambah,
+                'tanggal'   => date("Y-m-d H:i:s"),
+                'status'    => 6]);
+
+        return redirect()->action('KeuanganTUController@approvalBeli');
+    }
+
+    public function declineSingle($kdtransaksi, Request $request)
+    {
+        $query = Transaksi::select('*', 'transaksi.kdbarang as kd_barang', 'barang.jumlah as jml_barang')
+            ->join('barang', 'transaksi.kdbarang', '=', 'barang.kdbarang')
+            ->where('kdtransaksi', $kdtransaksi)->get();
+
+        foreach ($query as $x) {
+            $kdbarang = $x->kd_barang;
+            $jml_barang = $x->jml_barang;
+            $tambah = $x->tambah;
+        }
+
+        Transaksi::where('kdtransaksi', $kdtransaksi)
+            ->update(['status' => 7]);  
+
+        DB::table('notif_khusus')
+            ->where('pengirim', $kdtransaksi)
+            ->update(['status' => 8]);
+
+        DB::table('history')
+            ->insert([
+                'kdtransaksi'  => $kdtransaksi,
+                'status'  => 7,
+                'tanggal'    => date("Y-m-d")]);
+
+        DB::table('notifikasi')
+            ->insert([
+                'pengirim'  => $request->session()->get('kode_unit'),
+                'penerima'  => $kdtransaksi,
+                'header'    => "BELI BARANG DISETUJUI",
+                'pesan'     => "Barang telah dibeli, sejumlah ".$tambah,
+                'tanggal'   => date("Y-m-d H:i:s"),
+                'status'    => 6]);
+
+        return redirect()->action('KeuanganTUController@approvalBeli');
     }
 
     public function riwayatApprove()

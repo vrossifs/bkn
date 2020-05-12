@@ -27,11 +27,12 @@
 					<h4 class="panel-title">Lihat Data Bulanan</h4>
 				</div>
 				<div class="panel-body">
-					<form action="#" method="POST" class="form-horizontal" >
+					<form action="{{url('laporan/printLaporanBulan')}}" method="POST" class="form-horizontal" >
+						@csrf
 						<div class="form-group">
 							<label class="col-md-2 control-label">Pilih Bulan</label>
 							<div class="col-md-10">
-								<select class="form-control" name="bulan" id="bulan">
+								<select class="form-control" name="bulan" id="bulan" required>
 									<option value="" disabled selected>Pilih Bulan</option>
 									<option value="1">Januari</option>
 									<option value="2">Februari</option>
