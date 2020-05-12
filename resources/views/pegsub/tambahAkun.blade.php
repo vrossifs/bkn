@@ -23,7 +23,8 @@
 					<h4 class="panel-title">Input Data Akun</h4>
 				</div>
 				<div class="panel-body">
-					<form class="form-horizontal" method="POST" action="#" data-parsley-validate="true">
+					<form class="form-horizontal" method="POST" action="{{url('pegsub/aksiTambahAkun')}}" data-parsley-validate="true">
+						@csrf
 						<div class=" col-md-6">
 							<div class="form-group">
 								<label class="col-md-3 control-label">Nomor Induk Pegawai (NIP)</label>

@@ -23,7 +23,8 @@ class LaporanController extends Controller
             ->leftJoin('transaksi', 'barang.kdbarang', '=', 'transaksi.kdbarang')->get();
         $barang = Barang::select('*', 'barang.jumlah as br_jml', 'transaksi.tanggal as tr_tgl', 'barang.tanggal as br_tgl', DB::raw('SUM(tambah) as jml_tambah'), DB::raw('SUM(kurang) as jml_kurang'))
             ->leftJoin('transaksi', 'barang.kdbarang', '=', 'transaksi.kdbarang')
-            ->whereBetween('transaksi.tanggal', [$awal, $akhir])
+            ->where('transaksi.tanggal', '>=', $awal)
+            ->where('transaksi.tanggal', '<=', $akhir)
             ->where(function($query) {
                 $query->where('transaksi.status', 5)->orWhere('transaksi.status', 8);
             })

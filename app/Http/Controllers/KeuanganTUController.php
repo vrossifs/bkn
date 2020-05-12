@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Session;
+use App\Akun;
 use App\Transaksi;
 use App\Barang;
+use App\Pegawai;
 use App\UnitKerja;
 use DB;
 
@@ -43,7 +46,7 @@ class KeuanganTUController extends Controller
         // 
         Transaksi::create([
             'kdbarang' => $request->kdbarang,
-            'kode_unit' => $request->session()->get('kode_unit'),
+            'kode_unit' => session('kode_unit'),
             'tanggal' => date('Y-m-d'),
             'status' => 6,
             'jenistransaksi' => 'Beli',
@@ -51,7 +54,7 @@ class KeuanganTUController extends Controller
             'kurang' => 0
         ]);
 
-        $query = Transaksi::where('kode_unit', $request->session()->get('kode_unit'))
+        $query = Transaksi::where('kode_unit', session('kode_unit'))
             ->orderBy('kdtransaksi')->limit(1)->get();
 
         foreach ($query as $key) {
@@ -63,7 +66,7 @@ class KeuanganTUController extends Controller
                 'pengirim'  => $kdtransaksi,
                 'penerima'  => 2,
                 'header'    => "Pengajuan Pembelian",
-                'pesan'     => "Pengajuan pembelian barang<br> dari ".$request->session()->get('kode_unit'),
+                'pesan'     => "Pengajuan pembelian barang<br> dari ".session('kode_unit'),
                 'tanggal'   => date("Y-m-d H:i:s"),
                 'status'    => 6
             ]);
@@ -94,7 +97,7 @@ class KeuanganTUController extends Controller
     	// 
         Transaksi::create([
             'kdbarang' => $request->kdbarang,
-            'kode_unit' => $request->session()->get('kode_unit'),
+            'kode_unit' => session('kode_unit'),
             'tanggal' => date('Y-m-d'),
             'status' => 6,
             'jenistransaksi' => 'Ambil',
@@ -102,7 +105,7 @@ class KeuanganTUController extends Controller
             'kurang' => $request->jumlah
         ]);
 
-        $query = Transaksi::where('kode_unit', $request->session()->get('kode_unit'))
+        $query = Transaksi::where('kode_unit', session('kode_unit'))
             ->orderBy('kdtransaksi')->limit(1)->get();
 
         foreach ($query as $key) {
@@ -114,7 +117,7 @@ class KeuanganTUController extends Controller
                 'pengirim'  => $kdtransaksi,
                 'penerima'  => 3,
                 'header'    => "Pengajuan Pengambilan",
-                'pesan'     => "Pengajuan pengambilan barang<br> dari ".$request->session()->get('kode_unit'),
+                'pesan'     => "Pengajuan pengambilan barang<br> dari ".session('kode_unit'),
                 'tanggal'   => date("Y-m-d H:i:s"),
                 'status'    => 6
             ]);
@@ -180,12 +183,18 @@ class KeuanganTUController extends Controller
 
                     DB::table('notifikasi')
                         ->insert([
-                            'pengirim'  => $request->session()->get('kode_unit'),
+                            'pengirim'  => session('kode_unit'),
                             'penerima'  => $kdtransaksi,
                             'header'    => "BELI BARANG DISETUJUI",
                             'pesan'     => "Barang telah dibeli, sejumlah ".$tambah,
                             'tanggal'   => date("Y-m-d H:i:s"),
                             'status'    => 6]);
+
+                    session([
+                        'alert_type'    => 'alert-success',
+                        'alert_header'  => 'Success!',
+                        'alert_message' => 'Pengajuan telah disetujui!'
+                    ]);
                 }
             }
             return redirect()->action('KeuanganTUController@approvalBeli');
@@ -220,12 +229,18 @@ class KeuanganTUController extends Controller
 
                     DB::table('notifikasi')
                         ->insert([
-                            'pengirim'  => $request->session()->get('kode_unit'),
+                            'pengirim'  => session('kode_unit'),
                             'penerima'  => $kdtransaksi,
-                            'header'    => "BELI BARANG DISETUJUI",
-                            'pesan'     => "Barang telah dibeli, sejumlah ".$tambah,
+                            'header'    => "BELI BARANG TIDAK DISETUJUI",
+                            'pesan'     => "Permintaan anda tidak disetujui",
                             'tanggal'   => date("Y-m-d H:i:s"),
                             'status'    => 6]);
+
+                    session([
+                        'alert_type'    => 'alert-warning',
+                        'alert_header'  => 'Success!',
+                        'alert_message' => 'Pengajuan telah anda tolak!'
+                    ]);
                 }
             }
             return redirect()->action('KeuanganTUController@approvalBeli');
@@ -259,12 +274,18 @@ class KeuanganTUController extends Controller
 
         DB::table('notifikasi')
             ->insert([
-                'pengirim'  => $request->session()->get('kode_unit'),
+                'pengirim'  => session('kode_unit'),
                 'penerima'  => $kdtransaksi,
                 'header'    => "BELI BARANG DISETUJUI",
                 'pesan'     => "Barang telah dibeli, sejumlah ".$tambah,
                 'tanggal'   => date("Y-m-d H:i:s"),
                 'status'    => 6]);
+
+        session([
+            'alert_type'    => 'alert-success',
+            'alert_header'  => 'Success!',
+            'alert_message' => 'Pengajuan telah disetujui!'
+        ]);
 
         return redirect()->action('KeuanganTUController@approvalBeli');
     }
@@ -296,12 +317,18 @@ class KeuanganTUController extends Controller
 
         DB::table('notifikasi')
             ->insert([
-                'pengirim'  => $request->session()->get('kode_unit'),
+                'pengirim'  => session('kode_unit'),
                 'penerima'  => $kdtransaksi,
-                'header'    => "BELI BARANG DISETUJUI",
-                'pesan'     => "Barang telah dibeli, sejumlah ".$tambah,
+                'header'    => "BELI BARANG TIDAK DISETUJUI",
+                'pesan'     => "Permintaan anda tidak disetujui",
                 'tanggal'   => date("Y-m-d H:i:s"),
                 'status'    => 6]);
+
+        session([
+            'alert_type'    => 'alert-warning',
+            'alert_header'  => 'Success!',
+            'alert_message' => 'Pengajuan telah anda tolak!'
+        ]);
 
         return redirect()->action('KeuanganTUController@approvalBeli');
     }

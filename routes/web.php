@@ -89,9 +89,10 @@ Route::get('pegsub/tambahBarangLama', 'PegSubController@tambahBarangLama');
 Route::get('pegsub/tambahBarangPembelian', 'PegSubController@tambahBarangPembelian');
 Route::get('pegsub/manajemenAdmin', 'PegSubController@manajemenAdmin');
 Route::get('pegsub/tambahAkun', 'PegSubController@tambahAkun');
+Route::get('pegsub/editAkun/{nip}', 'PegSubController@editAkun');
 Route::get('pegsub/riwayatTambahBarang', 'PegSubController@riwayatTambahBarang');
 
-// DIalog PegSub
+// Dialog PegSub
 Route::get('pegsub/dialogBeliBarang/{kdbarang}', 'PegSubController@dialogBeliBarang');
 Route::get('pegsub/dialogDetailBarang/{kdbarang}', 'PegSubController@dialogDetailBarang');
 Route::get('pegsub/dialogLaporanTahun/', 'PegSubController@dialogLaporanTahun');
@@ -100,8 +101,15 @@ Route::get('pegsub/dialogLaporanBulan/', 'PegSubController@dialogLaporanBulan');
 // Action
 Route::post('pegsub/aksiBeliBarang', 'PegSubController@aksiBeliBarang');
 Route::post('pegsub/approve', 'PegSubController@approve');
+Route::post('pegsub/aksiTambahBarangBaru', 'PegSubController@aksiTambahBarangBaru');
+Route::post('pegsub/aksiTambahBarang', 'PegSubController@aksiTambahBarang');
+Route::get('pegsub/hapusBarang/{kdbarang}', 'PegSubController@hapusBarang');
 Route::get('pegsub/approveSingle/{kdtransaksi}', 'PegSubController@approveSingle');
 Route::get('pegsub/declineSingle/{kdtransaksi}', 'PegSubController@declineSingle');
+Route::get('pegsub/aksiTambahBarangSingle/{kdtransaksi}', 'PegSubController@aksiTambahBarangSingle');
+Route::post('pegsub/aksiTambahAkun', 'PegSubController@aksiTambahAkun');
+Route::get('pegsub/aksiEditAkun/{nip}', 'PegSubController@aksiEditAkun');
+Route::get('pegsub/hapusAkun/{nip}', 'PegSubController@hapusAkun');
 
 // -----
 
@@ -119,6 +127,12 @@ Route::get('pegbkn/aksiAmbilBarang', 'PegBknController@aksiAmbilBarang');
 Route::get('pegbkn/dialogBeliBarang/{kdbarang}', 'PegBknController@dialogBeliBarang');
 Route::get('pegbkn/dialogAmbilBarang/{kdbarang}', 'PegBknController@dialogAmbilBarang');
 Route::get('pegbkn/dialogDetailBarang/{kdbarang}', 'PegBknController@dialogDetailBarang');
+
+// Action
+Route::post('pegbkn/aksiBeliBarang', 'PegBknController@aksiBeliBarang');
+Route::post('pegbkn/aksiAmbilBarang', 'PegBknController@aksiAmbilBarang');
+
+// -----
 
 // Laporan
 Route::post('laporan/printLaporanTahun', 'LaporanController@printLaporanTahun');

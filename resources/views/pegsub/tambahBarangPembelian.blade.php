@@ -27,7 +27,8 @@
 					<h4 class="panel-title">Tambah Barang Pembelian</h4>
 				</div>
 				<div class="panel-body">
-					<form action="#" method="post">
+					<form action="{{url('pegsub/aksiTambahBarang')}}" method="POST">
+						@csrf
 						<table id="data-table" class="table table-striped table-bordered">
 							<thead>
 								<tr>
@@ -49,7 +50,7 @@
 										<td>{{$row->jenis}}</td>
 										<td>{{$row->nama_unit}}</td>
 										<td>{{$row->tambah." ".$row->satuan}}</td>
-										<td><a href="#" class="btn-success btn-sm" title="Tambah"><i class="fa fa-upload"></i></a></td>
+										<td><a href="{{url('pegsub/aksiTambahBarangSingle', $row->kdtransaksi)}}" class="btn-success btn-sm" title="Tambah"><i class="fa fa-upload"></i></a></td>
 									</tr>
 								@endforeach
 							</tbody>

@@ -12,6 +12,19 @@
 	</ol>
 	<!-- end breadcrumb -->
 	<h1 class="page-header m-b-10">Manajemen Admin</h1><hr />
+	@if(Session::get('alert_type') != '')
+	<div class="alert {{Session::get('alert_type')}} fade in m-b-15">
+		<strong>{{Session::get('alert_header')}}</strong>
+		{{Session::get('alert_message')}}
+		<span class="close" data-dismiss="alert">&times;</span>
+		<?php 
+		session([
+			'alert_type'    => '',
+			'alert_header'  => '',
+			'alert_message' => ''
+		]); ?>
+	</div>
+	@endif
 	<!-- begin row -->
 	<div class="row">
 		<!-- begin col-12 -->
@@ -52,7 +65,7 @@
 									<td>{{$row->nohp}}</td>
 									<td>{{$row->password}}</td>
 									<td>{{$row->nama_status}}</td>
-									<td><a href="#" class="btn-success btn-sm"><i class="fa fa-edit" title="Edit"></i></a> | <a href="#" onclick="return confirm('Apakah anda yakin?')" class="btn-danger btn-sm" title="Hapus"><i class="fa fa-trash-o"></i></a></td>
+									<td><a href="{{url('pegsub/editAkun', $row->nip)}}" class="btn-primary btn-sm"><i class="fa fa-edit" title="Edit"></i></a> | <a href="{{url('pegsub/hapusAkun',$row->nip)}}" onclick="return confirm('Apakah anda yakin?')" class="btn-danger btn-sm" title="Hapus"><i class="fa fa-trash-o"></i></a></td>
 								</tr>
 							@endforeach
 						</tbody>

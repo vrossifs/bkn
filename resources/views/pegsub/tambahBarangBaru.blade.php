@@ -22,7 +22,8 @@
 					<h4 class="panel-title">Input Data Barang</h4>
 				</div>
 				<div class="panel-body">
-					<form class="form-horizontal" method="POST" action="#">
+					<form class="form-horizontal" method="POST" action="{{url('pegsub/aksiTambahBarangBaru')}}">
+						@csrf
 						<div class=" col-md-6">
 							<div class="form-group">
 								<label class="col-md-3 control-label">Nama Barang</label>

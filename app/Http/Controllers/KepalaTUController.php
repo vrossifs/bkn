@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Session;
+use App\Akun;
 use App\Transaksi;
 use App\Barang;
+use App\Pegawai;
 use App\UnitKerja;
 use DB;
 
@@ -43,7 +46,7 @@ class KepalaTUController extends Controller
     	// 
         Transaksi::create([
             'kdbarang' => $request->kdbarang,
-            'kode_unit' => $request->session()->get('kode_unit'),
+            'kode_unit' => session('kode_unit'),
             'tanggal' => date('Y-m-d'),
             'status' => 6,
             'jenistransaksi' => 'Beli',
@@ -51,7 +54,7 @@ class KepalaTUController extends Controller
             'kurang' => 0
         ]);
 
-        $query = Transaksi::where('kode_unit', $request->session()->get('kode_unit'))
+        $query = Transaksi::where('kode_unit', session('kode_unit'))
             ->orderBy('kdtransaksi')->limit(1)->get();
 
         foreach ($query as $key) {
@@ -63,7 +66,7 @@ class KepalaTUController extends Controller
                 'pengirim'  => $kdtransaksi,
                 'penerima'  => 2,
                 'header'    => "Pengajuan Pembelian",
-                'pesan'     => "Pengajuan pembelian barang<br> dari ".$request->session()->get('kode_unit'),
+                'pesan'     => "Pengajuan pembelian barang<br> dari ".session('kode_unit'),
                 'tanggal'   => date("Y-m-d H:i:s"),
                 'status'    => 6
             ]);
@@ -94,7 +97,7 @@ class KepalaTUController extends Controller
         // 
         Transaksi::create([
             'kdbarang' => $request->kdbarang,
-            'kode_unit' => $request->session()->get('kode_unit'),
+            'kode_unit' => session('kode_unit'),
             'tanggal' => date('Y-m-d'),
             'status' => 6,
             'jenistransaksi' => 'Ambil',
@@ -102,7 +105,7 @@ class KepalaTUController extends Controller
             'kurang' => $request->jumlah
         ]);
 
-        $query = Transaksi::where('kode_unit', $request->session()->get('kode_unit'))
+        $query = Transaksi::where('kode_unit', session('kode_unit'))
             ->orderBy('kdtransaksi')->limit(1)->get();
 
         foreach ($query as $key) {
@@ -114,7 +117,7 @@ class KepalaTUController extends Controller
                 'pengirim'  => $kdtransaksi,
                 'penerima'  => 3,
                 'header'    => "Pengajuan Pembelian",
-                'pesan'     => "Pengajuan pembelian barang<br> dari ".$request->session()->get('kode_unit'),
+                'pesan'     => "Pengajuan pembelian barang<br> dari ".session('kode_unit'),
                 'tanggal'   => date("Y-m-d H:i:s"),
                 'status'    => 6
             ]);

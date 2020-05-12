@@ -2,7 +2,8 @@
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h4 class="modal-title">Pilih Bulan</h4>
 </div>
-<form action="#" method="POST" class="form-horizontal" >
+<form action="{{url('laporan/printLaporanBulan')}}" method="POST" class="form-horizontal" >
+    @csrf
     <div class="modal-body">
         <div class="form-group">
         	<label class="col-md-3 control-label">Pilih Bulan</label>

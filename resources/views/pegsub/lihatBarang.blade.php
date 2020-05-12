@@ -58,7 +58,7 @@
 								<td>{{$row->namabarang}}</td>
 								<td>{{$row->jenis}}</td>
 								<td>{{$row->jumlah." ".$row->satuan}}</td>
-								<td align="center"><a href="{{url('pegsub/dialogBeliBarang',$row->kdbarang)}}" data-toggle="modal" data-target="#myModal" class="btn-success btn-sm" title="Beli"><i class="fa fa-money"></i></a> | <a href="#" onclick="return confirm('Apakah anda yakin?')" class="btn-danger btn-sm" title="Hapus"><i class="fa fa-trash-o"></i></a> | <a href="{{url('pegsub/dialogDetailBarang',$row->kdbarang)}}" data-toggle="modal" data-target="#myModal" class="btn-primary btn-sm" title="Detail"><i class="fa fa-angle-double-right"></i></a></td>
+								<td align="center"><a href="{{url('pegsub/dialogBeliBarang',$row->kdbarang)}}" data-toggle="modal" data-target="#myModal" class="btn-success btn-sm" title="Beli"><i class="fa fa-money"></i></a> | <a href="{{url('pegsub/hapusBarang',$row->kdbarang)}}" onclick="return confirm('Apakah anda yakin?')" class="btn-danger btn-sm" title="Hapus"><i class="fa fa-trash-o"></i></a> | <a href="{{url('pegsub/dialogDetailBarang',$row->kdbarang)}}" data-toggle="modal" data-target="#myModal" class="btn-primary btn-sm" title="Detail"><i class="fa fa-angle-double-right"></i></a></td>
 							</tr>
 							@endforeach
 						</tbody>
