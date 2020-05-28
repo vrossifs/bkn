@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\Controller;
 use App\Akun;
 use App\Transaksi;
 use App\Barang;
@@ -14,6 +15,19 @@ use DB;
 
 class KepalaTUController extends Controller
 {
+    public function __construct()
+    {
+        if (session('status_login') != 'login') {
+            return redirect()->action('LoginController@index');
+        }elseif (session('kode_role') == "2") {
+            return redirect()->action('KeuanganTUController@index');
+        }elseif (session('kode_role') == "3") {
+            return redirect()->action('PegSubController@index');
+        }elseif (session('kode_role') == "4") {
+            return redirect()->action('PegBknController@index');
+        }
+    }
+
     //
     public function index()
     {
@@ -55,7 +69,7 @@ class KepalaTUController extends Controller
         ]);
 
         $query = Transaksi::where('kode_unit', session('kode_unit'))
-            ->orderBy('kdtransaksi')->limit(1)->get();
+            ->orderBy('kdtransaksi', 'desc')->limit(1)->get();
 
         foreach ($query as $key) {
             $kdtransaksi = $key->kdtransaksi;
@@ -66,7 +80,7 @@ class KepalaTUController extends Controller
                 'pengirim'  => $kdtransaksi,
                 'penerima'  => 2,
                 'header'    => "Pengajuan Pembelian",
-                'pesan'     => "Pengajuan pembelian barang<br> dari ".session('kode_unit'),
+                'pesan'     => "Pengajuan pembelian barang<br> dari ".session('unit_kerja'),
                 'tanggal'   => date("Y-m-d H:i:s"),
                 'status'    => 6
             ]);
@@ -106,7 +120,7 @@ class KepalaTUController extends Controller
         ]);
 
         $query = Transaksi::where('kode_unit', session('kode_unit'))
-            ->orderBy('kdtransaksi')->limit(1)->get();
+            ->orderBy('kdtransaksi', 'desc')->limit(1)->get();
 
         foreach ($query as $key) {
             $kdtransaksi = $key->kdtransaksi;
@@ -116,8 +130,8 @@ class KepalaTUController extends Controller
             ->insert([
                 'pengirim'  => $kdtransaksi,
                 'penerima'  => 3,
-                'header'    => "Pengajuan Pembelian",
-                'pesan'     => "Pengajuan pembelian barang<br> dari ".session('kode_unit'),
+                'header'    => "Pengajuan Pengambilan",
+                'pesan'     => "Pengajuan pengambilan barang<br> dari ".session('unit_kerja'),
                 'tanggal'   => date("Y-m-d H:i:s"),
                 'status'    => 6
             ]);
@@ -219,5 +233,36 @@ class KepalaTUController extends Controller
             ->where('transaksi.kode_unit', $kodeUnit)
             ->where('transaksi.status', 8)->get();
         return view('kepala.priviewKtu', compact('data'));
+    }
+
+    public function notifikasi($kdNotifikasi)
+    {
+      if ($kdNotifikasi != "all") {
+            DB::table('notifikasi')->where('kdnotifikasi', $kdNotifikasi)->update(['status' => 8]);
+            return redirect()->action('KepalaTUController@notifikasi', 'all');
+        }else {
+            $notifikasi = DB::table('notifikasi')
+                ->select('*', DB::raw('transaksi.tanggal AS tgl_transaksi'), DB::raw('notifikasi.tanggal AS tgl_approve'), DB::raw('notifikasi.status AS notif_status'))
+                ->join('unit_kerja', 'notifikasi.pengirim', '=', 'unit_kerja.kode_unit')
+                ->join('transaksi', 'notifikasi.penerima', '=', 'transaksi.kdtransaksi')
+                ->join('barang', 'transaksi.kdbarang', '=', 'barang.kdbarang')
+                ->join('status', 'transaksi.status', '=', 'status.kode_status')
+                ->where('transaksi.kode_unit', session('kode_unit'))
+                ->groupBy('kdnotifikasi')
+                ->orderBy('notifikasi.tanggal', 'desc')->get();
+            return view('kepala.notifikasi', compact('notifikasi'));
+        }
+    }
+
+    public function readNotif(){
+        $query = DB::table('transaksi')->where('kode_unit', session('kode_unit'))->get();
+        for ($i=0; $i < sizeof($query); $i++) { 
+            foreach ($query as $key) {
+                $where = "penerima = ".$key->kdtransaksi;
+                DB::table('notifikasi')->where('penerima', $key->kdtransaksi)->update(['status' => 8]);
+            }
+        }
+
+        return redirect()->action('KepalaTUController@notifikasi', 'all');
     }
 }

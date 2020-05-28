@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use App\Akun;
 use DB;
+use Mail;
 
 class LoginController extends Controller
 {
@@ -28,10 +29,10 @@ class LoginController extends Controller
 
     public function loginAction(Request $request)
     {
-    	//
+        //
         $this->validate($request, [
-            'username'	=>	'required',
-            'password'	=>	'required'
+            'username'  =>  'required',
+            'password'  =>  'required'
         ]);
 
         $checkLogin = DB::table('pegawai')
@@ -40,7 +41,7 @@ class LoginController extends Controller
             ->join('unit_kerja', 'pegawai.kode_unit', '=', 'unit_kerja.kode_unit')
             ->join('role', 'unit_kerja.kode_role', '=', 'role.kode_role')
             ->where([
-            	'akun.nip' =>  $request->get('username'),
+                'akun.nip' =>  $request->get('username'),
                 'password' =>  $request->get('password')
             ])->get();
 
@@ -65,9 +66,21 @@ class LoginController extends Controller
             }
 
             if ($status_akun != "Aktif") {
-                echo "Login Berhasil, tetapi Status akun anda Non-Aktif, hubungi admin";
+                session([
+                    'alert_type'    => 'alert-warning',
+                    'alert_header'  => 'Warning!',
+                    'alert_message' => 'Status akun anda Non-Aktif, hubungi admin'
+                ]);
+
+                return redirect()->action('LoginController@index');
             }elseif ($kode_role != $kdrole) {
-                echo "Login Berhasil, tetapi Akun anda tidak memiliki akses sebagai $nmrole";
+                session([
+                    'alert_type'    => 'alert-warning',
+                    'alert_header'  => 'Warning!',
+                    'alert_message' => 'Akun anda tidak memiliki akses sebagai '.$nmrole
+                ]);
+
+                return redirect()->action('LoginController@index');
             }else {
                 // data user
                 session([
@@ -106,100 +119,76 @@ class LoginController extends Controller
                 }
             }
         }else {
-        	echo "Login Gagal, Data tidak diketahui";
+            session([
+                'alert_type'    => 'alert-danger',
+                'alert_header'  => 'Error!',
+                'alert_message' => 'Nama Pengguna atau Kata Sandi salah.'
+            ]);
+
+            return redirect()->action('LoginController@index');
         }
-
-
-        // $username   = $this->input->post('username');
-        // $password   = $this->input->post('password');
-        // $data = explode("|", $this->input->post('role'));
-        // $kdrole     = $data[0];
-        // $nmrole     = $data[1];
-
-        // $cek = $this->m_login->cek_login($username, $password)->num_rows();
-        // if ($cek>0) {
-        //     $query = $this->m_login->cek_login($username, $password)->result();
-        //     foreach ($query as $datalogin) {
-        //         $nip            = $datalogin->nip;
-        //         $nama           = $datalogin->namalengkap;
-        //         $jeniskelamin   = $datalogin->jeniskelamin;
-        //         $statusnikah    = $datalogin->nama_status_nikah;
-        //         $alamat         = $datalogin->alamat;
-        //         $nohp           = $datalogin->nohp;
-        //         $username       = $datalogin->nip;
-        //         $password       = $datalogin->password;
-        //         $kode_unit      = $datalogin->kode_unit;
-        //         $unit_kerja     = $datalogin->nama_unit;
-        //         $kode_role      = $datalogin->kode_role;
-        //         $nama_role      = $datalogin->nama_role;
-        //         $status_akun    = $datalogin->nama_status;
-        //     }
-
-        //     if ($status_akun != "Aktif") {
-        //         $this->session->set_userdata('pesan_login', '<div class="alert alert-warning fade in m-b-15">
-        //                         <strong>Warning!</strong>
-        //                         Status akun anda Non-Aktif, hubungi admin
-        //                         <span class="close" data-dismiss="alert">&times;</span>
-        //                     </div>');
-        //         redirect($this->agent->referrer());
-        //     }elseif ($kode_role != $kdrole) {
-        //         $this->session->set_userdata('pesan_login', '<div class="alert alert-warning fade in m-b-15">
-        //                         <strong>Warning!</strong>
-        //                         Akun anda tidak memiliki akses sebagai '.$nmrole.'
-        //                         <span class="close" data-dismiss="alert">&times;</span>
-        //                     </div>');
-        //         redirect($this->agent->referrer());
-        //     }else {
-        //         $data_session = array(
-        //             'nip'           => $nip,
-        //             'nama'          => $nama,
-        //             'jeniskelamin'  => $jeniskelamin,
-        //             'statusnikah'   => $statusnikah,
-        //             'alamat'        => $alamat,
-        //             'nohp'          => $nohp,
-        //             'username'      => $username,
-        //             'password'      => $password,
-        //             'kode_unit'     => $kode_unit,
-        //             'unit_kerja'    => $unit_kerja,
-        //             'kode_role'     => $kode_role,
-        //             'nama_role'     => $nama_role,
-        //             'status_akun'   => $status_akun,
-        //             'status_login'  => 'login'
-        //         );
-
-        //         $this->session->set_userdata($data_session);
-
-        //         if ($this->session->userdata('kode_role')== "1"){
-        //             redirect('c_kepalaTU/index');
-        //         }elseif($this->session->userdata('kode_role')== "2") {
-        //             redirect('c_keuanganTU/index');
-        //         }elseif($this->session->userdata('kode_role')== "3"){
-        //             redirect('c_pegsub/index');
-        //         }elseif($this->session->userdata('kode_role')== "4"){
-        //             redirect('c_pegbkn/index');
-        //         }else{
-        //             redirect('welcome/index');
-        //         }
-        //     }
-        // }else {
-        //     $this->session->set_userdata('pesan_login','<div class="alert alert-danger fade in m-b-15">
-        //         <strong>Error!</strong>
-        //         Nama Pengguna atau Kata Sandi salah.
-        //         <span class="close" data-dismiss="alert">&times;</span>
-        //     </div>');
-        //     redirect($this->agent->referrer());
-        // }
     }
 
     public function logout()
     {
-    	session([
+        session([
             'username'  =>  "",
             'password'  =>  "",
             'status_login'    =>  "",
         ]);
-    	return redirect()->action('LoginController@index');
+        return redirect()->action('LoginController@index');
     }
 
+    public function ubahPassword(Request $request)
+    {
+        if ($request->lama != session('password')) {
+            echo "<script type='text/javascript'>window.alert('Kata Sandi Lama tidak sesuai');history.back(self);</script>";
+        }else{
+            DB::table('akun')->where('nip', session('nip'))->update(['password' => $request->baru]);
+            session(['password' => $request->baru]);
+            echo "<script type='text/javascript'>window.alert('Kata Sandi Berhasil Diubah');history.back(self);</script>";
+        }
+    }
 
+    public function resetPassword(Request $request){
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+        $charactersLength = strlen($characters);
+        $pass = '';
+        for ($i = 0; $i < 8; $i++) {
+            $pass .= $characters[rand(0, $charactersLength - 1)];
+        }
+        
+        $nip = $request->nip;
+        $email = $request->email;
+        $query = DB::table('pegawai')->where('nip' ,$nip)->get();
+        foreach ($query as $key) {
+            $email_akun = $key->email;
+        }
+
+        if ($email == $email_akun) {
+            $data = array(
+                'pass'  =>  $pass
+            );
+            
+            Mail::send('mail', $data, function($message) {
+                $message->to($email_akun)->subject('Pengaturan ulang kata sandi');
+                $message->from('omierp67@gmail.com', 'Aplikasi BKN');
+            });
+
+            session([
+                'alert_type'    => 'alert-info',
+                'alert_header'  => 'Info!',
+                'alert_message' => 'Petunjuk Login telah dikirim ke Email '.$email
+            ]);
+
+            return redirect()->action('LoginController@index');
+        }else {
+            session([
+                'alert_type'    => 'alert-danger',
+                'alert_header'  => 'Error!',
+                'alert_message' => 'Maaf, email yang anda masukkan berbeda dengan email yang terdaftar'
+            ]);
+            return redirect()->action('LoginController@index');
+        }
+    }
 }

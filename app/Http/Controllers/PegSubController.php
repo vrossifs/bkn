@@ -48,7 +48,7 @@ class PegSubController extends Controller
         ]);
 
         $query = Transaksi::where('kode_unit', session('kode_unit'))
-            ->orderBy('kdtransaksi')->limit(1)->get();
+            ->orderBy('kdtransaksi', 'desc')->limit(1)->get();
 
         foreach ($query as $key) {
             $kdtransaksi = $key->kdtransaksi;
@@ -59,7 +59,7 @@ class PegSubController extends Controller
                 'pengirim'  => $kdtransaksi,
                 'penerima'  => 2,
                 'header'    => "Pengajuan Pembelian",
-                'pesan'     => "Pengajuan pembelian barang<br> dari ".session('kode_unit'),
+                'pesan'     => "Pengajuan pembelian barang<br> dari ".session('unit_kerja'),
                 'tanggal'   => date("Y-m-d H:i:s"),
                 'status'    => 6
             ]);
@@ -691,5 +691,36 @@ class PegSubController extends Controller
                 'status' => 8
             ])->get();
         return view('pegsub.riwayatTambahBarang', compact('barang'));
+    }
+
+    public function notifikasi($kdNotifikasi)
+    {
+      if ($kdNotifikasi != "all") {
+            DB::table('notifikasi')->where('kdnotifikasi', $kdNotifikasi)->update(['status' => 8]);
+            return redirect()->action('PegSubController@notifikasi', 'all');
+        }else {
+            $notifikasi = DB::table('notifikasi')
+                ->select('*', DB::raw('transaksi.tanggal AS tgl_transaksi'), DB::raw('notifikasi.tanggal AS tgl_approve'), DB::raw('notifikasi.status AS notif_status'))
+                ->join('unit_kerja', 'notifikasi.pengirim', '=', 'unit_kerja.kode_unit')
+                ->join('transaksi', 'notifikasi.penerima', '=', 'transaksi.kdtransaksi')
+                ->join('barang', 'transaksi.kdbarang', '=', 'barang.kdbarang')
+                ->join('status', 'transaksi.status', '=', 'status.kode_status')
+                ->where('transaksi.kode_unit', session('kode_unit'))
+                ->groupBy('kdnotifikasi')
+                ->orderBy('notifikasi.tanggal', 'desc')->get();
+            return view('pegsub.notifikasi', compact('notifikasi'));
+        }
+    }
+
+    public function readNotif(){
+        $query = DB::table('transaksi')->where('kode_unit', session('kode_unit'))->get();
+        for ($i=0; $i < sizeof($query); $i++) { 
+            foreach ($query as $key) {
+                $where = "penerima = ".$key->kdtransaksi;
+                DB::table('notifikasi')->where('penerima', $key->kdtransaksi)->update(['status' => 8]);
+            }
+        }
+
+        return redirect()->action('PegSubController@notifikasi', 'all');
     }
 }

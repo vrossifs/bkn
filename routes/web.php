@@ -13,18 +13,10 @@
 
 //login
 Route::resource('/', 'LoginController');
-
-Route::post('/login/loginAction', [
-	'uses' => 'LoginController@loginAction'
-]);
-
-Route::post('/login/reset_password', [
-	'uses' => 'LoginController@reset_password'
-]);
-
-Route::get('/login/logout', [
-	'uses' => 'LoginController@logout'
-]);
+Route::post('login/loginAction', 'LoginController@loginAction');
+Route::post('login/resetPassword', 'LoginController@resetPassword');
+Route::post('login/ubahPassword', 'LoginController@ubahPassword');
+Route::get('login/logout', 'LoginController@logout');
 
 // -----
 
@@ -37,6 +29,7 @@ Route::get('kepala/beliBarang', 'KepalaTUController@beliBarang');
 Route::get('kepala/ambilBarang', 'KepalaTUController@ambilBarang');
 Route::get('kepala/lihatLaporan', 'KepalaTUController@lihatLaporan');
 Route::get('kepala/priviewKtu/{kodeUnit}', 'KepalaTUController@priviewKtu');
+Route::get('kepala/notifikasi/{kdNotifikasi}', 'KepalaTUController@notifikasi');
 
 // Dialog KepalaTU
 Route::get('kepala/dialogBeliBarang/{kdbarang}', 'KepalaTUController@dialogBeliBarang');
@@ -46,6 +39,7 @@ Route::get('kepala/dialogDetailBarang/{kdbarang}', 'KepalaTUController@dialogDet
 // Action
 Route::post('kepala/aksiBeliBarang', 'KepalaTUController@aksiBeliBarang');
 Route::post('kepala/aksiAmbilBarang', 'KepalaTUController@aksiAmbilBarang');
+Route::post('kepala/readNotif', 'KepalaTUController@readNotif');
 
 // -----
 
@@ -62,6 +56,7 @@ Route::get('keuangan/lihatLaporanTahunan', 'KeuanganTUController@lihatLaporanTah
 Route::get('keuangan/lihatLaporanBulanan', 'KeuanganTUController@lihatLaporanBulanan');
 Route::get('keuangan/priviewKtu/{kodeUnit}', 'KeuanganTUController@priviewKtu');
 Route::get('keuangan/riwayatTambahBarang', 'KeuanganTUController@riwayatTambahBarang');
+Route::get('keuangan/notifikasi/{kdNotifikasi}', 'KeuanganTUController@notifikasi');
 
 // Dialog KeuanganTU
 Route::get('keuangan/dialogBeliBarang/{kdbarang}', 'KeuanganTUController@dialogBeliBarang');
@@ -74,6 +69,7 @@ Route::post('keuangan/aksiAmbilBarang', 'KeuanganTUController@aksiAmbilBarang');
 Route::post('keuangan/approve', 'KeuanganTUController@approve');
 Route::get('keuangan/approveSingle/{kdtransaksi}', 'KeuanganTUController@approveSingle');
 Route::get('keuangan/declineSingle/{kdtransaksi}', 'KeuanganTUController@declineSingle');
+Route::post('keuangan/readNotif', 'KeuanganTUController@readNotif');
 
 // -----
 
@@ -91,6 +87,7 @@ Route::get('pegsub/manajemenAdmin', 'PegSubController@manajemenAdmin');
 Route::get('pegsub/tambahAkun', 'PegSubController@tambahAkun');
 Route::get('pegsub/editAkun/{nip}', 'PegSubController@editAkun');
 Route::get('pegsub/riwayatTambahBarang', 'PegSubController@riwayatTambahBarang');
+Route::get('pegsub/notifikasi/{kdNotifikasi}', 'PegSubController@notifikasi');
 
 // Dialog PegSub
 Route::get('pegsub/dialogBeliBarang/{kdbarang}', 'PegSubController@dialogBeliBarang');
@@ -110,6 +107,7 @@ Route::get('pegsub/aksiTambahBarangSingle/{kdtransaksi}', 'PegSubController@aksi
 Route::post('pegsub/aksiTambahAkun', 'PegSubController@aksiTambahAkun');
 Route::get('pegsub/aksiEditAkun/{nip}', 'PegSubController@aksiEditAkun');
 Route::get('pegsub/hapusAkun/{nip}', 'PegSubController@hapusAkun');
+Route::post('pegsub/readNotif', 'PegSubController@readNotif');
 
 // -----
 
@@ -119,9 +117,7 @@ Route::resource('pegbkn/index', 'PegBknController');
 Route::get('pegbkn/lihatBarang', 'PegBknController@lihatBarang');
 Route::get('pegbkn/beliBarang', 'PegBknController@beliBarang');
 Route::get('pegbkn/ambilBarang', 'PegBknController@ambilBarang');
-
-Route::get('pegbkn/aksiBeliBarang', 'PegBknController@aksiBeliBarang');
-Route::get('pegbkn/aksiAmbilBarang', 'PegBknController@aksiAmbilBarang');
+Route::get('pegbkn/notifikasi/{kdNotifikasi}', 'PegBknController@notifikasi');
 
 // Dialog KepalaTU
 Route::get('pegbkn/dialogBeliBarang/{kdbarang}', 'PegBknController@dialogBeliBarang');
@@ -131,6 +127,7 @@ Route::get('pegbkn/dialogDetailBarang/{kdbarang}', 'PegBknController@dialogDetai
 // Action
 Route::post('pegbkn/aksiBeliBarang', 'PegBknController@aksiBeliBarang');
 Route::post('pegbkn/aksiAmbilBarang', 'PegBknController@aksiAmbilBarang');
+Route::post('pegbkn/readNotif', 'PegBknController@readNotif');
 
 // -----
 

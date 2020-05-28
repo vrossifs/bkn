@@ -11,6 +11,19 @@
     </style>
 </head>
 <body>
+    @if(Session::get('alert_type') != '')
+    <div class="alert {{Session::get('alert_type')}} fade in m-b-15">
+        <strong>{{Session::get('alert_header')}}</strong>
+        {{Session::get('alert_message')}}
+        <span class="close" data-dismiss="alert">&times;</span>
+        <?php 
+        session([
+            'alert_type'    => '',
+            'alert_header'  => '',
+            'alert_message' => ''
+        ]); ?>
+    </div>
+    @endif
     <!-- begin #page-loader -->
     <div id="page-loader" class="fade in"><span class="spinner"></span></div>
     <!-- end #page-loader -->
@@ -63,13 +76,10 @@
                         <div class="login-buttons">
                             <button type="submit" class="btn btn-success btn-block btn-lg" name="submit">Masuk</button>
                         </div>
-                        <!-- <div class="m-t-20 m-b-40 p-b-40 text-inverse">
-                            Lupa password? Klik <a href="#modal-dialog-lupapassword" data-toggle="modal">di sini</a> untuk petunjuk.
-                        </div> -->
+                        <div class="m-t-20 m-b-40 p-b-40 text-inverse">
+                            Lupa password? Klik <a href="#" data-toggle="modal">di sini</a> untuk petunjuk.
+                        </div>
                     </form>
-                    <!-- <div class="m-t-20 m-b-40 p-b-40 text-inverse">
-                        Lupa password? Klik <a href="#modal-dialog-lupapassword" data-toggle="modal">di sini</a> untuk petunjuk.
-                    </div> -->
                 </div>
                 <!-- end login-content -->
             </div>
@@ -85,7 +95,8 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     <h4 class="modal-title">Lupa Password</h4>
                 </div>
-                <form class="form-horizontal" method="POST" action="{{action('LoginController@reset_password')}}" data-parsley-validate="true">
+                <form class="form-horizontal" method="POST" action="{{action('LoginController@resetPassword')}}" data-parsley-validate="true">
+                    @csrf
                     <div class="modal-body">
                         <div class="form-group">
                             <label class="col-md-2 control-label">NIP</label>

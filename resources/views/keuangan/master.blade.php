@@ -5,7 +5,51 @@
 	@section('css')
 	@stop
 </header>
-<body>
+<body>	
+
+	@if (session('status_login') != 'login') {
+		<script type="text/javascript">
+			confirm('Anda harus login terlebih dahulu');
+			window.location = "{{url('')}}";
+		</script>
+	@elseif (session('kode_role') == "1")
+		<script type="text/javascript">
+			window.location = "{{url('keuangan/index')}}";
+		</script>
+	@elseif (session('kode_role') == "3")
+		<script type="text/javascript">
+			window.location = "{{url('pegsub/index')}}";
+		</script>
+	@elseif (session('kode_role') == "4")
+		<script type="text/javascript">
+			window.location = "{{url('pegbkn/index')}}";
+		</script>
+	@endif
+
+	<?php 
+
+	$pengajuan = DB::table('notif_khusus')
+		->select('*', DB::raw('notif_khusus.tanggal AS tgl_notifikasi'))
+		->join('unit_kerja', 'notif_khusus.penerima', '=', 'unit_kerja.kode_unit')
+		->join('transaksi', 'notif_khusus.pengirim', '=', 'transaksi.kdtransaksi')
+		->where('penerima', session('kode_unit'))
+		->where('notif_khusus.status', 6)
+		->groupBy('kdnotif')
+		->orderBy('notif_khusus.tanggal', 'desc')
+		->limit(2)->get();
+
+	$notifikasi = DB::table('notifikasi')
+		->select('*', DB::raw('notifikasi.tanggal AS tgl_notifikasi'))
+		->join('unit_kerja', 'notifikasi.pengirim', '=', 'unit_kerja.kode_unit')
+		->join('transaksi', 'notifikasi.penerima', '=', 'transaksi.kdtransaksi')
+		->where('transaksi.kode_unit', session('kode_unit'))
+		->where('notifikasi.status', 6)
+		->groupBy('kdnotifikasi')
+		->orderBy('notifikasi.tanggal')
+		->limit(4)->get();
+
+	?>
+
 	<!-- begin #header -->
 	<div id="header" class="header navbar navbar-default navbar-fixed-top">
 		<!-- begin container-fluid -->
@@ -18,12 +62,51 @@
 
 			<!-- begin header navigation right -->
 			<ul class="nav navbar-nav navbar-right">
+				<li class="dropdown">
+					<a href="javascript:;" data-toggle="dropdown" class="dropdown-toggle f-s-14">
+						<i class="fa fa-bell-o"></i>
+						<span class="label">{{sizeof($notifikasi)+sizeof($pengajuan)}}</span>
+					</a>
+					<ul class="dropdown-menu media-list pull-right animated fadeInDown">
+						<li class="dropdown-header">Notifikasi Pengajuan</li>
+						<?php 
+						foreach ($pengajuan as $key) { ?>
+							<li class="media">
+								<a href="{{url('keuangan/approvalBeli')}}">
+									<div class="media-body">
+										<h6 class="media-heading">{{$key->header}}</h6>
+										<p><?php echo $key->pesan;?></p>
+										<div class="text-muted f-s-11">{{date("H:i, d-m-Y", strtotime($key->tgl_notifikasi))}}</div>
+									</div>
+								</a>
+							</li>
+						<?php } ?>
+						<li class="dropdown-header">Notifikasi</li>
+						<?php 
+						foreach ($notifikasi as $key) { ?>
+							<li class="media">
+								<a href="{{url('keuangan/notifikasi',$key->kdnotifikasi)}}">
+									<div class="media-body">
+										<h6 class="media-heading">{{$key->header}}</h6>
+										<p><?php echo $key->pesan;?></p>
+										<div class="text-muted f-s-11">{{$key->nama_unit}}</div>
+										<div class="text-muted f-s-11">{{date("H:i, d-m-Y", strtotime($key->tgl_notifikasi))}}</div>
+									</div>
+								</a>
+							</li>
+						<?php } ?>
+						<li class="dropdown-footer text-center">
+                            <a href="{{url('keuangan/notifikasi', 'all')}}">View more</a>
+                        </li>
+					</ul>
+				</li>
+
 				<li class="dropdown navbar-user">
 					<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
 						<span class="hidden-xs"></span>{{Session::get('nama')}}<b class="caret"></b>
 					</a>
 					<ul class="dropdown-menu animated fadeInLeft">
-						<li><a href="#" data-toggle="modal">Ubah Password</a></li>
+						<li><a href="#modal-dialog-ubahpassword" data-toggle="modal">Ubah Password</a></li>
 						<li class="divider"></li>
 						<li><a href="{{action('LoginController@logout')}}">Log Out</a></li>
 					</ul>
@@ -100,6 +183,45 @@
 		</div>
 	</div>
 	<!-- end modal -->
+
+	<!-- #modal-dialog -->
+	<div class="modal fade" id="modal-dialog-ubahpassword">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+					<h4 class="modal-title">Ubah Password</h4>
+				</div>
+				<form class="form-horizontal" method="POST" action="{{action('LoginController@ubahPassword')}}">
+					@csrf
+					<div class="modal-body">
+						<div class="form-group">
+							<label class="col-md-3 control-label">Nomor Induk Penduduk (NIP)</label>
+							<div class="col-md-8">
+								<input type="text" class="form-control" value="{{session('nip')}}" name="nip" readonly/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-md-3 control-label">Password Lama</label>
+							<div class="col-md-8">
+								<input type="password" class="form-control" placeholder="Password Lama" name="lama" data-toggle="password" data-placement="after"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-md-3 control-label">Password Baru</label>
+							<div class="col-md-8">
+								<input type="password" class="form-control" placeholder="Password Baru" name="baru" data-toggle="password" data-placement="after"/>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<a href="javascript:;" class="btn btn-sm btn-white" data-dismiss="modal">Close</a>
+						<button type="submit" class="btn btn-sm btn-success" name="submit">Submit</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
 </body>
 <footer>
 	@section('javascript')
