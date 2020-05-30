@@ -17,6 +17,11 @@ Route::post('login/loginAction', 'LoginController@loginAction');
 Route::post('login/resetPassword', 'LoginController@resetPassword');
 Route::post('login/ubahPassword', 'LoginController@ubahPassword');
 Route::get('login/logout', 'LoginController@logout');
+Route::get('/sendMail', function(){
+    \Mail::to(session('email'))->send(new \App\Mail\SendMail());
+    DB::table('akun')->where('nip', session('nip'))->update(['password' => session('pass')]);
+    return redirect()->action('LoginController@index');
+});
 
 // -----
 

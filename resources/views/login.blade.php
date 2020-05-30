@@ -77,7 +77,7 @@
                             <button type="submit" class="btn btn-success btn-block btn-lg" name="submit">Masuk</button>
                         </div>
                         <div class="m-t-20 m-b-40 p-b-40 text-inverse">
-                            Lupa password? Klik <a href="#" data-toggle="modal">di sini</a> untuk petunjuk.
+                            Lupa password? Klik <a href="#modal-dialog-lupapassword" data-toggle="modal">di sini</a> untuk petunjuk.
                         </div>
                     </form>
                 </div>

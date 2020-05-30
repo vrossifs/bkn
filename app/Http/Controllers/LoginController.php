@@ -10,6 +10,8 @@ use Mail;
 
 class LoginController extends Controller
 {
+    public $email_akun;
+
     //
     public function index()
     {
@@ -158,30 +160,26 @@ class LoginController extends Controller
             $pass .= $characters[rand(0, $charactersLength - 1)];
         }
         
-        $nip = $request->nip;
-        $email = $request->email;
-        $query = DB::table('pegawai')->where('nip' ,$nip)->get();
+        $query = DB::table('pegawai')->where('nip', $request->nip)->get();
         foreach ($query as $key) {
             $email_akun = $key->email;
         }
 
-        if ($email == $email_akun) {
+        if ($request->email == $email_akun) {
             $data = array(
                 'pass'  =>  $pass
             );
-            
-            Mail::send('mail', $data, function($message) {
-                $message->to($email_akun)->subject('Pengaturan ulang kata sandi');
-                $message->from('omierp67@gmail.com', 'Aplikasi BKN');
-            });
 
             session([
+                'nip'           => $request->nip,
+                'email'         => $request->email,
+                'pass'          => $pass,
                 'alert_type'    => 'alert-info',
                 'alert_header'  => 'Info!',
-                'alert_message' => 'Petunjuk Login telah dikirim ke Email '.$email
+                'alert_message' => 'Petunjuk Login telah dikirim ke Email '.$request->email
             ]);
 
-            return redirect()->action('LoginController@index');
+            return redirect('sendMail');
         }else {
             session([
                 'alert_type'    => 'alert-danger',
